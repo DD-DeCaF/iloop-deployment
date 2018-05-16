@@ -168,7 +168,7 @@ spec:
             cpu: "100m"
           limits:
             cpu: "500m"
-        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery worker"]
+        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery", "worker"]
       - name: redis
         image: redis:latest
         resources:
@@ -383,7 +383,7 @@ spec:
             cpu: "100m"
           limits:
             cpu: "500m"
-        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery worker"]
+        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery", "worker"]
       - name: redis
         image: redis:latest
         resources:
