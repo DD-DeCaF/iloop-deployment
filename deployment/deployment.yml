@@ -248,7 +248,7 @@ spec:
         - name: POSTGRES_PORT_5432_TCP_ADDR
           value: localhost:5432
         - name: POSTGRES_DB_NAME
-          value: iloop
+          value: iloop_staging
         - name: POSTGRES_ENV_USERNAME
           valueFrom:
             secretKeyRef:
