@@ -21,7 +21,7 @@ spec:
         - containerPort: 5000
         env:
         - name: DEBUG
-          value: False
+          value: "False"
         - name: API_PREFIX
           value: /api
         - name: SETTINGS_OBJECT
@@ -98,7 +98,7 @@ spec:
         - containerPort: 4000
         env:
         - name: DEBUG
-          value: False
+          value: "False"
         - name: API_PREFIX
           value: /api
         - name: SETTINGS_OBJECT
@@ -236,7 +236,7 @@ spec:
         - containerPort: 5000
         env:
         - name: DEBUG
-          value: False
+          value: "False"
         - name: API_PREFIX
           value: /api
         - name: SETTINGS_OBJECT
@@ -313,7 +313,7 @@ spec:
         - containerPort: 4000
         env:
         - name: DEBUG
-          value: False
+          value: "False"
         - name: API_PREFIX
           value: /api
         - name: SETTINGS_OBJECT
