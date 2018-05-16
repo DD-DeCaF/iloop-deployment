@@ -1,0 +1,61 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: iloop-production
+  annotations:
+    prometheus.io/probe: "true"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+spec:
+  selector:
+    app: iloop
+    env: production
+  ports:
+  - name: web
+    protocol: TCP
+    port: 80
+    targetPort: 5000
+  - name: worker
+    protocol: TCP
+    port: 4000
+    targetPort: 4000
+  - name: redis
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+  - name: redis-exporter
+    protocol: TCP
+    port: 9121
+    targetPort: 9121
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: iloop-staging
+  annotations:
+    prometheus.io/probe: "true"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9121"
+spec:
+  selector:
+    app: iloop
+    env: staging
+  ports:
+  - name: web
+    protocol: TCP
+    port: 80
+    targetPort: 5000
+  - name: worker
+    protocol: TCP
+    port: 4000
+    targetPort: 4000
+  - name: redis
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+  - name: redis-exporter
+    protocol: TCP
+    port: 9121
+    targetPort: 9121

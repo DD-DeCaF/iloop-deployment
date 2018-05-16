@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: iloop-production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - data.dd-decaf.eu
+    - iloop-staging.dd-decaf.eu
+    secretName: decaf-tls
+  rules:
+  - host: data.dd-decaf.eu
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: iloop-production
+          servicePort: 80
+  - host: iloop-staging.dd-decaf.eu
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: iloop-staging
+          servicePort: 80

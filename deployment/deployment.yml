@@ -1,0 +1,427 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iloop-production
+spec:
+  selector:
+    matchLabels:
+      app: iloop
+      env: production
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iloop
+        env: production
+    spec:
+      containers:
+      - name: web
+        image: gcr.io/dd-decaf-cfbf6/iloop:master
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DEBUG
+          value: False
+        - name: API_PREFIX
+          value: /api
+        - name: SETTINGS_OBJECT
+          value: iloop.settings.Production
+        - name: FIREBASE_ENABLED
+          value: "1"
+        - name: FIREBASE_PROJECT_ID
+          value: dd-decaf-cfbf6
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: localhost:5432
+        - name: POSTGRES_DB_NAME
+          value: iloop
+        - name: POSTGRES_ENV_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: POSTGRES_ENV_USERNAME
+        - name: POSTGRES_ENV_PASS
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: POSTGRES_ENV_PASS
+        - name: FIREBASE_CLIENT_CERT_URL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_CERT_URL
+        - name: FIREBASE_CLIENT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_EMAIL
+        - name: FIREBASE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_ID
+        - name: FIREBASE_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_PRIVATE_KEY
+        - name: FIREBASE_PRIVATE_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_PRIVATE_KEY_ID
+        - name: OPBEAT_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_APP_ID
+        - name: OPBEAT_ORGANIZATION_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_ORGANIZATION_ID
+        - name: OPBEAT_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_SECRET_TOKEN
+        - name: REDIS_PORT_6379_TCP_ADDR
+          value: redis:6379
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+        command: ["./runserver.sh"]
+      - name: worker
+        image: gcr.io/dd-decaf-cfbf6/iloop:master
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DEBUG
+          value: False
+        - name: API_PREFIX
+          value: /api
+        - name: SETTINGS_OBJECT
+          value: iloop.settings.Production
+        - name: FIREBASE_ENABLED
+          value: "1"
+        - name: FIREBASE_PROJECT_ID
+          value: dd-decaf-cfbf6
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: localhost:5432
+        - name: POSTGRES_DB_NAME
+          value: iloop
+        - name: POSTGRES_ENV_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: POSTGRES_ENV_USERNAME
+        - name: POSTGRES_ENV_PASS
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: POSTGRES_ENV_PASS
+        - name: FIREBASE_CLIENT_CERT_URL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_CERT_URL
+        - name: FIREBASE_CLIENT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_EMAIL
+        - name: FIREBASE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_CLIENT_ID
+        - name: FIREBASE_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_PRIVATE_KEY
+        - name: FIREBASE_PRIVATE_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: FIREBASE_PRIVATE_KEY_ID
+        - name: OPBEAT_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_APP_ID
+        - name: OPBEAT_ORGANIZATION_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_ORGANIZATION_ID
+        - name: OPBEAT_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: iloop-production
+              key: OPBEAT_SECRET_TOKEN
+        - name: REDIS_PORT_6379_TCP_ADDR
+          value: redis:6379
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery worker"]
+      - name: redis
+        image: redis:latest
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "512Mi"
+          limits:
+            cpu: "100m"
+        ports:
+        - containerPort: 6379
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        ports:
+        - containerPort: 9121
+        env:
+        - name: REDIS_ADDR
+          value: "redis:6379"
+        - name: REDIS_ALIAS
+          value: iloop
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy", "-instances=dd-decaf-cfbf6:europe-west1:dd-decaf=tcp:5432", "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "100m"
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iloop-staging
+spec:
+  selector:
+    matchLabels:
+      app: iloop
+      env: staging
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iloop
+        env: staging
+    spec:
+      containers:
+      - name: web
+        image: gcr.io/dd-decaf-cfbf6/iloop:master
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DEBUG
+          value: False
+        - name: API_PREFIX
+          value: /api
+        - name: SETTINGS_OBJECT
+          value: iloop.settings.Production
+        - name: FIREBASE_ENABLED
+          value: "1"
+        - name: FIREBASE_PROJECT_ID
+          value: dd-decaf-cfbf6
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: localhost:5432
+        - name: POSTGRES_DB_NAME
+          value: iloop
+        - name: POSTGRES_ENV_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: POSTGRES_ENV_USERNAME
+        - name: POSTGRES_ENV_PASS
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: POSTGRES_ENV_PASS
+        - name: FIREBASE_CLIENT_CERT_URL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_CERT_URL
+        - name: FIREBASE_CLIENT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_EMAIL
+        - name: FIREBASE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_ID
+        - name: FIREBASE_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_PRIVATE_KEY
+        - name: FIREBASE_PRIVATE_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_PRIVATE_KEY_ID
+        - name: OPBEAT_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_APP_ID
+        - name: OPBEAT_ORGANIZATION_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_ORGANIZATION_ID
+        - name: OPBEAT_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_SECRET_TOKEN
+        - name: REDIS_PORT_6379_TCP_ADDR
+          value: redis:6379
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+        command: ["./runserver.sh"]
+      - name: worker
+        image: gcr.io/dd-decaf-cfbf6/iloop:master
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DEBUG
+          value: False
+        - name: API_PREFIX
+          value: /api
+        - name: SETTINGS_OBJECT
+          value: iloop.settings.Production
+        - name: FIREBASE_ENABLED
+          value: "1"
+        - name: FIREBASE_PROJECT_ID
+          value: dd-decaf-cfbf6
+        - name: POSTGRES_PORT_5432_TCP_ADDR
+          value: localhost:5432
+        - name: POSTGRES_DB_NAME
+          value: iloop
+        - name: POSTGRES_ENV_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: POSTGRES_ENV_USERNAME
+        - name: POSTGRES_ENV_PASS
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: POSTGRES_ENV_PASS
+        - name: FIREBASE_CLIENT_CERT_URL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_CERT_URL
+        - name: FIREBASE_CLIENT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_EMAIL
+        - name: FIREBASE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_CLIENT_ID
+        - name: FIREBASE_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_PRIVATE_KEY
+        - name: FIREBASE_PRIVATE_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: FIREBASE_PRIVATE_KEY_ID
+        - name: OPBEAT_APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_APP_ID
+        - name: OPBEAT_ORGANIZATION_ID
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_ORGANIZATION_ID
+        - name: OPBEAT_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: iloop-staging
+              key: OPBEAT_SECRET_TOKEN
+        - name: REDIS_PORT_6379_TCP_ADDR
+          value: redis:6379
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+        command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery worker"]
+      - name: redis
+        image: redis:latest
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "512Mi"
+          limits:
+            cpu: "100m"
+        ports:
+        - containerPort: 6379
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        ports:
+        - containerPort: 9121
+        env:
+        - name: REDIS_ADDR
+          value: "redis:6379"
+        - name: REDIS_ALIAS
+          value: iloop
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy", "-instances=dd-decaf-cfbf6:europe-west1:dd-decaf=tcp:5432", "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "100m"
+      volumes:
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: cloudsql-instance-credentials
