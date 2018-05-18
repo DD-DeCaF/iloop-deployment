@@ -85,7 +85,7 @@ spec:
               name: iloop-production
               key: OPBEAT_SECRET_TOKEN
         - name: REDIS_PORT_6379_TCP_ADDR
-          value: redis:6379
+          value: localhost:6379
         resources:
           requests:
             cpu: "100m"
@@ -162,7 +162,7 @@ spec:
               name: iloop-production
               key: OPBEAT_SECRET_TOKEN
         - name: REDIS_PORT_6379_TCP_ADDR
-          value: redis:6379
+          value: localhost:6379
         resources:
           requests:
             cpu: "100m"
@@ -300,7 +300,7 @@ spec:
               name: iloop-staging
               key: OPBEAT_SECRET_TOKEN
         - name: REDIS_PORT_6379_TCP_ADDR
-          value: redis:6379
+          value: localhost:6379
         resources:
           requests:
             cpu: "100m"
@@ -377,7 +377,7 @@ spec:
               name: iloop-staging
               key: OPBEAT_SECRET_TOKEN
         - name: REDIS_PORT_6379_TCP_ADDR
-          value: redis:6379
+          value: localhost:6379
         resources:
           requests:
             cpu: "100m"
