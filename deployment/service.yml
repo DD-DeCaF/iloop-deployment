@@ -15,14 +15,6 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 5000
-  - name: worker
-    protocol: TCP
-    port: 4000
-    targetPort: 4000
-  - name: redis
-    protocol: TCP
-    port: 6379
-    targetPort: 6379
   - name: redis-exporter
     protocol: TCP
     port: 9121
@@ -47,14 +39,6 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 5000
-  - name: worker
-    protocol: TCP
-    port: 4000
-    targetPort: 4000
-  - name: redis
-    protocol: TCP
-    port: 6379
-    targetPort: 6379
   - name: redis-exporter
     protocol: TCP
     port: 9121
