@@ -18,7 +18,7 @@ spec:
       - name: web
         image: gcr.io/dd-decaf-cfbf6/iloop:master
         ports:
-        - containerPort: 5000
+        - containerPort: 80
         env:
         - name: DEBUG
           value: "False"
@@ -233,7 +233,7 @@ spec:
       - name: web
         image: gcr.io/dd-decaf-cfbf6/iloop:master
         ports:
-        - containerPort: 5000
+        - containerPort: 80
         env:
         - name: DEBUG
           value: "False"
