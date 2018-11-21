@@ -18,26 +18,3 @@ spec:
     protocol: TCP
     port: 9121
     targetPort: 9121
-
----
-
-kind: Service
-apiVersion: v1
-metadata:
-  name: iloop-staging
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "9121"
-spec:
-  selector:
-    app: iloop
-    env: staging
-  ports:
-  - name: web
-    protocol: TCP
-    port: 80
-    targetPort: 80
-  - name: redis-exporter
-    protocol: TCP
-    port: 9121
-    targetPort: 9121
