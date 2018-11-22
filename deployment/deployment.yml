@@ -179,21 +179,6 @@ spec:
             cpu: "100m"
         ports:
         - containerPort: 6379
-      - name: redis-exporter
-        image: oliver006/redis_exporter:latest
-        ports:
-        - containerPort: 9121
-        env:
-        - name: REDIS_ADDR
-          value: "redis:6379"
-        - name: REDIS_ALIAS
-          value: iloop
-        resources:
-          requests:
-            cpu: "10m"
-            memory: "128Mi"
-          limits:
-            cpu: "100m"
       - name: cloudsql-proxy
         image: gcr.io/cloudsql-docker/gce-proxy:1.11
         command: ["/cloud_sql_proxy", "-instances=dd-decaf-cfbf6:europe-west1:dd-decaf=tcp:5432", "-credential_file=/secrets/cloudsql/credentials.json"]
