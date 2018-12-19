@@ -87,9 +87,8 @@ spec:
         - name: REDIS_PORT_6379_TCP_ADDR
           value: localhost:6379
         resources:
-          limits:
-            cpu: "1000m"
-            memory: "1024Mi"
+          requests:
+            cpu: "0"
         command: ["./runserver.sh"]
       - name: worker
         image: gcr.io/dd-decaf-cfbf6/iloop:master
@@ -163,16 +162,14 @@ spec:
         - name: REDIS_PORT_6379_TCP_ADDR
           value: localhost:6379
         resources:
-          limits:
-            cpu: "1000m"
-            memory: "1024Mi"
+          requests:
+            cpu: "0"
         command: ["python3", "worker.py", "-l", "debug", "-A", "iloop.extensions.celery", "worker"]
       - name: redis
         image: redis:latest
         resources:
-          limits:
-            cpu: "1000m"
-            memory: "1024Mi"
+          requests:
+            cpu: "0"
         ports:
         - containerPort: 6379
       - name: cloudsql-proxy
@@ -183,9 +180,8 @@ spec:
             mountPath: /secrets/cloudsql
             readOnly: true
         resources:
-          limits:
-            cpu: "1000m"
-            memory: "1024Mi"
+          requests:
+            cpu: "0"
       volumes:
       - name: cloudsql-instance-credentials
         secret:
